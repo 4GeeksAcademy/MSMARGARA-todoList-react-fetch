@@ -1,12 +1,34 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300&family=Raleway:wght@300&family=Roboto:wght@300;400&display=swap');
+body{
+    background-color: #B0C4DE;
+    color:white
+}
+.container{
+    margin-top: 14vh;
+    width:100vh;
+    font-family:'Quicksand', sans-serif;
+    border-color: 1px solid white;
+}
+.fecha{
+    font-size: 5vh;
+}
+.input{
+    background-color: white;
+    border: none;
+    border-radius: 1vh;
+    font-size: 3vh;
+}
+.input:focus {
+    outline: 0.4vh solid #717f92;
+}
+ul {
+    list-style-type: none; 
+    margin: 0; 
+    padding: 0; 
+}
 
-/* 
-
-    You can write your own styles here...
-    
-    
-    ...Or you can use the import command to include 
-    other sylesheets into your bunde as well, e.j:
-    
-    import 'relative/path/to/stylesheet.scss';
-
-*/
+li {
+    border-bottom: 1px solid white; 
+    margin-bottom: 1vh; 
+    padding: 0.8vh; 
+}

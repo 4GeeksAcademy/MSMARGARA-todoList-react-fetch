@@ -1,134 +1,166 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 
 const Home = () => {
-	const [inputValue, setInputValue] = useState("");
-	const [data, setData] = useState([]);
-	const [hoverItem, setHoverItem] = useState(null);
-	useEffect(() => {
-		fetch("https://playground.4geeks.com/apis/fake/todos/user/msmargara", {
-		  method: "POST",
-		  headers: {
-			"Content-Type": "application/json",
-		  },
-		  body: JSON.stringify([]),
-		})
-			.then(resp => resp.json())
-			.then(response => {
-				if (response.msg === "The user exist") {
-					console.log("Error al crear el usuario", response.msg);
-					fetch("https://playground.4geeks.com/apis/fake/todos/user/msmargara")
-					.then(resp => resp.json())
-					.then((data)=> setData(data))
-					.catch((error) => {console.error(error);});
-				}
-				else if(!response.ok){
-					console.log("Error al generar usuario");
-				}
-				else if (response.ok){
-					console.log("El usuario se creo correctamente")
-					fetch("https://playground.4geeks.com/apis/fake/todos/user/msmargara")
-					.then(resp => resp.json())
-					.then((data)=> setData(data))
-					.catch((error) => {console.error(error);});
-			}  	})
-			.catch((error) => {
-				console.error(error);
-			});
-	}, []);  
-	const handleChange = (event) => {
-		setInputValue(event.target.value);
-	};
-	const handleAddTodo = () => {
-		if (inputValue.trim() === "") {
-			console.log("Por favor ingrese una tarea");
-			return;
-		}
-		const newTask = { label: inputValue, done: false, id: Date.now().toString()};
-		const newData = [...data, newTask];
-		fetch("https://playground.4geeks.com/apis/fake/todos/user/msmargara", {
-			method: "PUT",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(newData),
-		})
-			.then(res => {
-				if (!res.ok) throw Error(res.statusText);
-				return res.json();
-			})
-			.then(response => {
-				console.log('Success:', response);
-				setData(newData);
-				setInputValue(""); 
-			})
-			.catch(error => console.error(error));
-	};	
-	const handleMouseEnter = (taskId) => {
-		setHoverItem(taskId);
-	};
-	const handleMouseLeave = () => {
-		setHoverItem(null);
-	};
-	const deleteTodo = (taskId) => {
-		fetch(`https://playground.4geeks.com/apis/fake/todos/user/Marina/${taskId}`, {
-			method: "DELETE",
-			headers: {
-				"Content-Type": "application/json",
-			},
-		})
-			.then(res => {
-				console.log("Response status:", res.status);
-				if (!res.ok) throw Error(res.statusText);
-				return res.json();
-			})
-			.then(response => {
-				console.log("Response from DELETE:", response);
-				if (response.result === "ok") {
-					setData(prevData => prevData.filter((task) => task.id !== taskId));
-				} else {
-					console.log("Error al borrar la tarea:", response);
-				}
-			})
-			.catch(error => console.error(error));
-	};
-	return (
-		<div className="text-center">
-		  <h1 className="text-center mt-5">Todo List</h1>
-		  <input
-			type="text"
-			value={inputValue}
-			onChange={handleChange}
-			onKeyDown={(e) => {
-			  if (e.key === "Enter") {
-				handleAddTodo();
-			  }
-			}}
-		  />
-		  <ul>
-			{data.map((task) => (
-				<li
-				key={task.id}
-				onMouseEnter={() => handleMouseEnter(task.id)}
-				onMouseLeave={handleMouseLeave}
-				>
+  const [inputValue, setInputValue] = useState("");
+  const [data, setData] = useState([]);
+  const [hoverItem, setHoverItem] = useState(null);
+  const [currentDate, setCurrentDate] = useState("");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "https://playground.4geeks.com/apis/fake/todos/user/msmargara"
+        );
+
+        if (!response.ok) {
+          throw new Error("Error fetching data");
+        }
+
+        const result = await response.json();
+        setData(result);
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
+
+    fetchData();
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString("es-AR"); 
+    setCurrentDate(formattedDate);
+  }, []);
+
+  const handleChange = (event) => {
+    setInputValue(event.target.value);
+  };
+
+  const handleAddTodo = async () => {
+    try {
+      if (inputValue.trim() === "") {
+        console.log("Por favor ingrese una tarea");
+        return;
+      }
+
+      const newTask = { label: inputValue, done: false, id: Date.now().toString() };
+      const newData = [...data, newTask];
+
+      const response = await fetch(
+        "https://playground.4geeks.com/apis/fake/todos/user/msmargara",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newData),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Error adding task");
+      }
+
+      const result = await response.json();
+      console.log("Success:", result);
+
+      setData(newData);
+      setInputValue("");
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const handleMouseEnter = (taskId) => {
+    setHoverItem(taskId);
+  };
+
+  const handleMouseLeave = () => {
+    setHoverItem(null);
+  };
+
+  const deleteTodo = async (taskId) => {
+    try {
+      const response = await fetch(
+        `https://playground.4geeks.com/apis/fake/todos/user/msmargara/${taskId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Error deleting task");
+      }
+
+      const result = await response.json();
+      console.log("Response from DELETE:", result);
+
+      if (result.result === "ok") {
+        setData((prevData) => prevData.filter((task) => task.id !== taskId));
+      } else {
+        console.log("Error al borrar la tarea:", result);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  return (
+    <div className="container px-5 py-3">
+      <div className="d-flex justify-content-between align-items-end">
+        <div>
+          <h1 className="title">TO DO LIST</h1>
+          <p>CHECK MY PENDING TASKS</p>
+        </div>
+        <div>
+          <p className="fecha">{currentDate}</p>
+        </div>
+      </div>
+      <input
+	  	className="input w-100"
+        type="text"
+        value={inputValue}
+        onChange={handleChange}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            handleAddTodo();
+          }
+        }}
+      />
+      <ul>
+        {data.map((task) => (
+          <li
+            key={task.id}
+            onMouseEnter={() => handleMouseEnter(task.id)}
+            onMouseLeave={handleMouseLeave}
+          >
+			<div className="d-flex justify-content-between">
+				<div>
 					<span>{task.label}</span>
-					{hoverItem === task.id && (
+				</div>
+				<div>
+				{hoverItem === task.id && (
 					<span
 						style={{
 						cursor: "pointer",
-						marginLeft: "5px",
-						color: "red",
+						color: "white",
 						fontWeight: "bold",
+						marginRight: '2vh'
 						}}
 						onClick={() => deleteTodo(task.id)}
 					>
 						X
 					</span>
-					)}
-				</li>
-			))}
-		  </ul>
-		</div>
-	);
+				)}
+				</div>
+			</div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 };
+
 export default Home;
+
